@@ -1,0 +1,28 @@
+module io.github.mchav.fregeandroid.FregeActivity where
+data Bundle = native android.os.Bundle
+
+data Context = native android.content.Context
+
+data FregeActivity = native android.app.Activity where
+	native getApplicationContext :: MutableIO FregeActivity -> IO (MutableIO Context)
+	native setContentView :: MutableIO FregeActivity -> MutableIO TextView -> IO ()
+
+data TextView = native android.widget.TextView where
+	native new :: MutableIO Context -> STMutable RealWorld TextView
+	native setText :: MutableIO TextView -> String -> IO ()
+
+onCreateF :: MutableIO FregeActivity -> IO ()
+onCreateF !this = do
+	context <- this.getApplicationContext
+	tv <- TextView.new context
+	tv.setText "Hello, Android - Love, Frege"
+	this.setContentView tv
+
+native module type FregeActivity where {
+	@Override
+    public void onCreate(android.os.Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        final frege.run7.Func.U<Object,Short> res = RunTM.<frege.run7.Func.U<Object,Short>>cast(onCreateF(this)).call();
+		frege.prelude.PreludeBase.TST.run(res).call();
+    }
+}
